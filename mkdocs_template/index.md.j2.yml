@@ -1,0 +1,11 @@
+# Project Documentation
+
+This documentation was automatically generated from source materials.
+
+{% for item in sections %}
+## {{ item['title'] }}
+
+{{ item['summary'] }}
+
+[Read More]({{ item['file'] }})
+{% endfor %}

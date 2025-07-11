@@ -1,0 +1,6 @@
+ollama
+mkdocs
+python-docx
+pymupdf
+pillow
+jinja2

@@ -1,0 +1,7 @@
+site_name: Generated Project Documentation
+theme:
+  name: material
+nav:
+{% for page in pages %}
+  - {{ page['title'] }}: {{ page['file'] }}
+{% endfor %}

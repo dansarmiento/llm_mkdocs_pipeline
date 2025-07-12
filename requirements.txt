@@ -6,3 +6,4 @@ pillow
 jinja2
 pytest
 pytest-mock
+pyfakefs

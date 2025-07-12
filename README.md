@@ -42,3 +42,25 @@ Here's a step-by-step breakdown of the process, from input to the final MkDocs s
 5.  **The Final Output**: The result is a complete and ready-to-use MkDocs project in the output folder you specified. You can then serve this as a local website using the command `mkdocs serve` from within the output directory, or you can deploy it to a web server.
 
 In essence, this project acts as an automated "documentation writer" that takes your raw notes and documents, uses an LLM to clean them up and structure them, and then assembles them into a professional-looking documentation website with MkDocs.
+
+### **Minimum Requirements (for smaller models like Mistral 7B)**
+This configuration is suitable for basic functionality, testing, and processing smaller batches of documents with a 7-billion-parameter model.
+
+* **Operating System:** 64-bit Linux (Ubuntu Server 22.04 LTS is recommended).
+* **CPU:** 2 Cores (4 cores recommended for better performance).
+* **RAM:** **8 GB**. This is the most critical requirement. An LLM with ~7 billion parameters requires at least this much available memory to load and run.
+* **Disk Space:** **25 GB** of fast storage (SSD/NVMe).
+    * **OS:** ~5-10 GB for a standard server installation.
+    * **Ollama + Models:** ~10 GB (Ollama itself is small, but a 7B model like `mistral:7b` is over 4 GB, and you'll want space for others).
+    * **Project Files & Workspace:** ~5 GB for the pipeline, its dependencies, and your input/output documents.
+
+---
+
+### **Recommended Specifications (for better performance and larger models)**
+This configuration provides a smoother experience, allows for faster document processing, and gives you the flexibility to use larger, more capable models (e.g., 13B models) or run multiple models.
+
+* **Operating System:** 64-bit Linux (Ubuntu Server 22.04 LTS).
+* **CPU:** **4 Cores** or more (modern CPU with AVX support is a plus).
+* **RAM:** **16 GB** or more. This is the minimum for running 13B parameter models and provides significant overhead for the OS and other processes, preventing slowdowns. If you plan to use models larger than 13B, you will need 32 GB or more.
+* **Disk Space:** **50 GB** or more (SSD/NVMe).
+    * This provides ample space for the OS, multiple large language models, Python dependencies, and a large corpus of documents to be processed without worrying about storage constraints.

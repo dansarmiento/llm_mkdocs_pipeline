@@ -6,8 +6,8 @@ from pathlib import Path
 
 from config import Config
 from file_handler import collect_inputs, Inputs
-from parser import DocumentParser
-from llm_interface import OllamaClient
+from parser import DocumentParser, ParseError
+from llm_interface import OllamaClient, OllamaError
 from mkdocs_generator import MkDocsGenerator
 
 def main() -> None:
@@ -31,6 +31,14 @@ def main() -> None:
     # 1. Load configuration
     cfg: Config = Config.from_args()
 
+    # Validate input directory
+    if not cfg.input_dir.exists() or not cfg.input_dir.is_dir():
+        print(
+            f"Error: Input directory '{cfg.input_dir}' does not exist or is not a directory.",
+            file=sys.stderr
+        )
+        sys.exit(1)
+
     # 2. Scan input directory for supported files
     inputs: Inputs = collect_inputs(cfg.input_dir)
 
@@ -42,8 +50,15 @@ def main() -> None:
     # 'text' stores the extracted text content as a string.
     docs: List[Dict[str, Union[Path, str]]] = []
     for path_obj in inputs.documents: # path_obj is of type Path
-        text: str = parser.extract(path_obj)
-        docs.append({'path': path_obj, 'text': text})
+        try:
+            text: str = parser.extract(path_obj)
+            docs.append({'path': path_obj, 'text': text})
+        except ParseError as e:
+            print(
+                f"Error parsing document '{path_obj.name}': {e}",
+                file=sys.stderr
+            )
+            sys.exit(1)
 
     # 4. Summarize with LLM
     client: OllamaClient = OllamaClient(model=cfg.model)
@@ -55,8 +70,15 @@ def main() -> None:
         # Ensure 'path' is a Path object and 'text' is a string before processing
         doc_path: Path = doc['path'] # type: ignore
         doc_text: str = str(doc['text'])
-        summary: str = client.summarize(doc_text, title=doc_path.stem)
-        summaries.append({'title': doc_path.stem, 'content': summary})
+        try:
+            summary: str = client.summarize(doc_text, title=doc_path.stem)
+            summaries.append({'title': doc_path.stem, 'content': summary})
+        except OllamaError as e:
+            print(
+                f"Error processing document '{doc_path.name}' with Ollama: {e}",
+                file=sys.stderr
+            )
+            sys.exit(1)
 
     # 5. Copy media files
     # This step is handled internally by the MkDocsGenerator.build() method.
@@ -67,7 +89,14 @@ def main() -> None:
         summaries=summaries,
         media_paths=inputs.media,
     )
-    generator.build()
+    try:
+        generator.build()
+    except OSError as e:
+        print(
+            f"Error: Could not create output directory or write files in '{cfg.output_dir}'. Reason: {e}",
+            file=sys.stderr
+        )
+        sys.exit(1)
 
     print(f"Documentation generated at {cfg.output_dir}/")
 
